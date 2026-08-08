@@ -10,11 +10,21 @@ class CalculationType(str, Enum):
     SUBTRACTION = "subtraction"
     MULTIPLICATION = "multiplication"
     DIVISION = "division"
-
+    POWER = "power"
+    ROOT = "root"
+    MODULUS = "modulus"
+    INTEGER_DIVISION = "integer_division"
+    PERCENTAGE = "percentage"
+    ABSOLUTE_DIFFERENCE = "absolute_difference"
+    
 class CalculationBase(BaseModel):
     type: CalculationType = Field(
         ...,
-        description="Type of calculation (addition, subtraction, multiplication, division)",
+        description="Type of calculation (" \
+                    "addition, subtraction, " \
+                    "multiplication, division" \
+                    "power, root, modulus, integer division," \
+                    "percentage, absolute differenece)",
         json_schema_extra={"example": "addition"}
     )
     inputs: List[float] = Field(

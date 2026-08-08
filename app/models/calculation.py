@@ -84,6 +84,12 @@ class AbstractCalculation:
             'subtraction': Subtraction,
             'multiplication': Multiplication,
             'division': Division,
+            'power': Power,
+            'root': Root,
+            'modulus': Modulus,
+            'integer_division': IntegerDivision,
+            'percentage': Percentage,
+            'absolute_difference': AbsoluteDifference,
         }
         calculation_class = calculation_classes.get(calculation_type.lower())
         if not calculation_class:
@@ -177,3 +183,77 @@ class Power(Calculation):
         if isinstance(result, complex):
             raise ValueError("Result is a complex number (negative base with fractional exponent).")
         return result
+    
+class Root(Calculation):
+    """Root calculation: degree-th root of base"""
+    __mapper_args__ = {"polymorphic_identity": "root"}
+
+    def get_result(self) -> float:
+        if not isinstance(self.inputs, list):
+            raise ValueError("Inputs must be a list of numbers.")
+        if len(self.inputs) != 2:
+            raise ValueError("Root requires exactly two inputs: [base, degree].")
+        base, degree = self.inputs
+        if degree == 0:
+            raise ValueError("Root degree cannot be zero.")
+        if base < 0 and degree % 2 == 0:
+            raise ValueError("Cannot compute an even root of a negative number.")
+        if base < 0:
+            return -((-base) ** (1 / degree))
+        return base ** (1 / degree)
+class Modulus(Calculation):
+    """Modulus calculation: base % divisor"""
+    __mapper_args__ = {"polymorphic_identity": "modulus"}
+
+    def get_result(self) -> float:
+        if not isinstance(self.inputs, list):
+            raise ValueError("Inputs must be a list of numbers.")
+        if len(self.inputs) != 2:
+            raise ValueError("Modulus requires exactly two inputs: [dividend, divisor].")
+        dividend, divisor = self.inputs
+        if divisor == 0:
+            raise ValueError("Cannot compute modulus with a divisor of zero.")
+        return dividend % divisor
+
+
+class IntegerDivision(Calculation):
+    """Integer division: base // divisor"""
+    __mapper_args__ = {"polymorphic_identity": "integer_division"}
+
+    def get_result(self) -> float:
+        if not isinstance(self.inputs, list):
+            raise ValueError("Inputs must be a list of numbers.")
+        if len(self.inputs) != 2:
+            raise ValueError("Integer division requires exactly two inputs: [dividend, divisor].")
+        dividend, divisor = self.inputs
+        if divisor == 0:
+            raise ValueError("Cannot divide by zero.")
+        return dividend // divisor
+
+
+class Percentage(Calculation):
+    """Percentage calculation: what percent 'part' is of 'whole', i.e. (part / whole) * 100"""
+    __mapper_args__ = {"polymorphic_identity": "percentage"}
+
+    def get_result(self) -> float:
+        if not isinstance(self.inputs, list):
+            raise ValueError("Inputs must be a list of numbers.")
+        if len(self.inputs) != 2:
+            raise ValueError("Percentage requires exactly two inputs: [part, whole].")
+        part, whole = self.inputs
+        if whole == 0:
+            raise ValueError("Cannot compute percentage with a whole of zero.")
+        return (part / whole) * 100
+
+
+class AbsoluteDifference(Calculation):
+    """Absolute difference: |a - b|"""
+    __mapper_args__ = {"polymorphic_identity": "absolute_difference"}
+
+    def get_result(self) -> float:
+        if not isinstance(self.inputs, list):
+            raise ValueError("Inputs must be a list of numbers.")
+        if len(self.inputs) != 2:
+            raise ValueError("Absolute difference requires exactly two inputs.")
+        a, b = self.inputs
+        return abs(a - b)

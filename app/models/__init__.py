@@ -12,7 +12,11 @@ from .calculation import (
     Addition,
     Subtraction,
     Multiplication,
-    Division
+    Division,
+    Modulus,
+    IntegerDivision,
+    Percentage,
+    AbsoluteDifference
 )
 
 __all__ = [
@@ -21,5 +25,9 @@ __all__ = [
     "Addition",
     "Subtraction",
     "Multiplication",
-    "Division"
+    "Division",
+    "Modulus",
+    "IntegerDivision",
+    "Percentage",
+    "AbsoluteDifference"
 ]
