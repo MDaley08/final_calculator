@@ -159,3 +159,21 @@ class Division(Calculation):
                 raise ValueError("Cannot divide by zero.")
             result /= value
         return result
+
+class Power(Calculation):
+    """Power calculation: base ** exponent"""
+    __mapper_args__ = {"polymorphic_identity": "Power"}
+
+    def get_result(self) -> float:
+        if not isinstance(self.inputs, list):
+            raise ValueError("Inputs must be a list of numbers.")
+        if len(self.inputs) != 2:
+            raise ValueError("Power requires exacrlt two inputs; [base, exponent]")
+        base, exponent = self.inputs
+        try:
+            result = base ** exponent
+        except ZeroDivisionError:
+            raise ValueError("Cannot raise zero to a negative power.")
+        if isinstance(result, complex):
+            raise ValueError("Result is a complex number (negative base with fractional exponent).")
+        return result
