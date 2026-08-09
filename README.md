@@ -1,5 +1,5 @@
 # Project Description
-A calculator web app built with FastAPI. Users register and log in (JWT-based auth, passwords hashed with bcrypt), then create, view, edit, and delete calculations, all persisted in PostgreSQL via SQLAlchemy. The frontend is server-rendered with Jinja2 templates; calculation operations are exposed as a REST API underneath. Supports addition, subtraction, multiplication, division, power, root, modulus, integer division, percentage and absolute difference math operations.
+A calculator web app built with FastAPI. Users register and log in (JWT-based auth, passwords hashed with bcrypt), then create, view, edit, and delete calculations, all persisted in PostgreSQL via SQLAlchemy. The frontend is server-rendered with Jinja2 templates; calculation operations are exposed as a REST API underneath. Supports addition, subtraction, multiplication, division, power, root, modulus, integer division, percentage and absolute difference math operations.g
 
 
 # 📦 Project Setup
