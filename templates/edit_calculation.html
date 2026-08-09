@@ -294,6 +294,44 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         result = inputs.reduce((a, b, i) => i === 0 ? a : a / b, inputs[0]);
         break;
+      case 'power':
+        result = Math.pow(inputs[0], inputs[1]);
+        if (typeof result === 'number' && isNaN(result)) {
+          return 'Result is not a real number';
+        }
+        break;
+      case 'root':
+        if (inputs[1] === 0) {
+          return 'Root degree cannot be zero';
+        }
+        if (inputs[0] < 0 && inputs[1] % 2 === 0) {
+          return 'Cannot compute an even root of a negative number';
+        }
+        result = inputs[0] < 0 ?
+          -Math.pow(-inputs[0], 1 / inputs[1]) :
+          Math.pow(inputs[0], 1 / inputs[1]);
+        break;
+      case 'modulus':
+        if (inputs[1] === 0) {
+          return 'Cannot compute modulus with a divisor of zero';
+        }
+        result = inputs[0] % inputs[1];
+        break;
+      case 'integer_division':
+        if (inputs[1] === 0) {
+          return 'Cannot divide by zero';
+        }
+        result = Math.floor(inputs[0] / inputs[1]);
+        break;
+      case 'percentage':
+        if (inputs[1] === 0) {
+          return 'Cannot compute percentage with a whole of zero';
+        }
+        result = (inputs[0] / inputs[1]) * 100;
+        break;
+      case 'absolute_difference':
+        result = Math.abs(inputs[0] - inputs[1]);
+        break;
       default:
         return 'Unknown operation';
     }
@@ -329,6 +367,24 @@ document.addEventListener('DOMContentLoaded', async () => {
         break;
       case 'division':
         operator = '÷';
+        break;
+      case 'power':
+        operator = '^';
+        break;
+      case 'root':
+        operator = '√';
+        break;
+      case 'modulus':
+        operator = '%';
+        break;
+      case 'integer_division':
+        operator = '//';
+        break;
+      case 'percentage':
+        operator = ':';
+        break;
+      case 'absolute_difference':
+        operator = 'Δ';
         break;
       default:
         operator = '?';
