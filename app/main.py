@@ -33,7 +33,7 @@ import uvicorn  # ASGI server for running FastAPI apps
 
 # Application imports
 from app.auth.dependencies import get_current_active_user  # Authentication dependency
-from app.models.calculation import Calculation  # Database model for calculations
+from app.models.calculation import Calculation, utcnow  # Database model for calculations
 from app.models.user import User  # Database model for users
 from app.schemas.calculation import CalculationBase, CalculationResponse, CalculationUpdate  # API request/response schemas
 from app.schemas.token import TokenResponse  # API token schema
@@ -93,7 +93,7 @@ def read_index(request: Request):
     
     Displays the welcome page with links to register and login.
     """
-    return templates.TemplateResponse("index.html", {"request": request})
+    return templates.TemplateResponse(request, "index.html")
 
 @app.get("/login", response_class=HTMLResponse, tags=["web"])
 def login_page(request: Request):
@@ -102,7 +102,7 @@ def login_page(request: Request):
     
     Displays a form for users to enter credentials and log in.
     """
-    return templates.TemplateResponse("login.html", {"request": request})
+    return templates.TemplateResponse(request, "login.html")
 
 @app.get("/register", response_class=HTMLResponse, tags=["web"])
 def register_page(request: Request):
@@ -111,7 +111,7 @@ def register_page(request: Request):
     
     Displays a form for new users to create an account.
     """
-    return templates.TemplateResponse("register.html", {"request": request})
+    return templates.TemplateResponse(request, "register.html")
 
 @app.get("/dashboard", response_class=HTMLResponse, tags=["web"])
 def dashboard_page(request: Request):
@@ -125,7 +125,7 @@ def dashboard_page(request: Request):
     
     JavaScript in this page calls the API endpoints to fetch and display data.
     """
-    return templates.TemplateResponse("dashboard.html", {"request": request})
+    return templates.TemplateResponse(request, "dashboard.html")
 
 @app.get("/dashboard/view/{calc_id}", response_class=HTMLResponse, tags=["web"])
 def view_calculation_page(request: Request, calc_id: str):
@@ -142,7 +142,7 @@ def view_calculation_page(request: Request, calc_id: str):
     Returns:
         HTMLResponse: Rendered template with calculation ID passed to frontend
     """
-    return templates.TemplateResponse("view_calculation.html", {"request": request, "calc_id": calc_id})
+    return templates.TemplateResponse(request, "view_calculation.html", {"calc_id": calc_id})
 
 @app.get("/dashboard/edit/{calc_id}", response_class=HTMLResponse, tags=["web"])
 def edit_calculation_page(request: Request, calc_id: str):
@@ -159,7 +159,7 @@ def edit_calculation_page(request: Request, calc_id: str):
     Returns:
         HTMLResponse: Rendered template with calculation ID passed to frontend
     """
-    return templates.TemplateResponse("edit_calculation.html", {"request": request, "calc_id": calc_id})
+    return templates.TemplateResponse(request, "edit_calculation.html", {"calc_id": calc_id})
 
 
 # ------------------------------------------------------------------------------
@@ -184,7 +184,7 @@ def register(user_create: UserCreate, db: Session = Depends(get_db)):
     """
     Create a new user account.
     """
-    user_data = user_create.dict(exclude={"confirm_password"})
+    user_data = user_create.model_dump(exclude={"confirm_password"})
     try:
         user = User.register(db, user_data)
         db.commit()
@@ -361,7 +361,7 @@ def update_calculation(
         calculation.inputs = calculation_update.inputs
         calculation.result = calculation.get_result()
 
-    calculation.updated_at = datetime.utcnow()
+    calculation.updated_at = utcnow()
     db.commit()
     db.refresh(calculation)
     return calculation
@@ -397,6 +397,6 @@ def delete_calculation(
 # ------------------------------------------------------------------------------
 # Main Block to Run the Server
 # ------------------------------------------------------------------------------
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     import uvicorn
     uvicorn.run("app.main:app", host="127.0.0.1", port=8001, log_level="info")
