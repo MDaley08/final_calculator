@@ -8,6 +8,8 @@ from contextlib import contextmanager
 import pytest
 import requests
 from faker import Faker
+from sqlalchemy import create_engine, text
+from sqlalchemy.engine.url import make_url
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
 from playwright.sync_api import sync_playwright, Browser, Page
@@ -32,7 +34,25 @@ logger = logging.getLogger(__name__)
 fake = Faker()
 Faker.seed(12345)
 
-test_engine = get_engine(database_url=settings.DATABASE_URL)
+def _ensure_test_database_url(app_database_url: str) -> str:
+    app_url = make_url(app_database_url)
+    test_db_name = f"{app_url.database}_test"
+
+    admin_engine = create_engine(app_url.set(database="postgres"), isolation_level="AUTOCOMMIT")
+    try:
+        with admin_engine.connect() as conn:
+            exists = conn.execute(
+                text("SELECT 1 FROM pg_database WHERE datname = :name"),
+                {"name": test_db_name},
+            ).scalar()
+            if not exists:
+                conn.execute(text(f'CREATE DATABASE "{test_db_name}"'))
+    finally:
+        admin_engine.dispose()
+
+    return app_url.set(database=test_db_name).render_as_string(hide_password=False)
+
+test_engine = get_engine(database_url=_ensure_test_database_url(settings.DATABASE_URL))
 TestingSessionLocal = get_sessionmaker(engine=test_engine)
 
 # ======================================================================================
@@ -96,7 +116,7 @@ def setup_test_database(request):
     try:
         Base.metadata.drop_all(bind=test_engine)
         Base.metadata.create_all(bind=test_engine)
-        init_db()
+        init_db(test_engine)
         logger.info("Test database initialized.")
     except Exception as e:
         logger.error(f"Error setting up test database: {str(e)}")
@@ -106,7 +126,7 @@ def setup_test_database(request):
 
     if not request.config.getoption("--preserve-db"):
         logger.info("Dropping test database tables...")
-        drop_db()
+        drop_db(test_engine)
 
 @pytest.fixture
 def db_session() -> Generator[Session, None, None]:
