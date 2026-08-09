@@ -74,7 +74,7 @@ def test_calculation_base_case_insensitive_type():
 def test_calculation_base_invalid_type():
     """Test that invalid calculation type raises ValidationError."""
     data = {
-        "type": "modulus",  # Invalid type
+        "type": "integral",  # Invalid type
         "inputs": [10, 3]
     }
     with pytest.raises(ValidationError) as exc_info:

@@ -1,5 +1,5 @@
 # app/models/calculation.py
-from datetime import datetime
+from datetime import datetime, timezone
 import uuid
 from typing import List
 from sqlalchemy import Column, String, DateTime, ForeignKey, JSON, Float
@@ -7,6 +7,11 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship, declared_attr
 from sqlalchemy.ext.declarative import declared_attr
 from app.database import Base
+
+
+def utcnow() -> datetime:
+    """Naive UTC timestamp, matching the naive (timezone-less) DateTime columns below."""
+    return datetime.now(timezone.utc).replace(tzinfo=None)
 
 class AbstractCalculation:
     """Abstract base class for calculations"""
@@ -58,17 +63,17 @@ class AbstractCalculation:
     @declared_attr
     def created_at(cls):
         return Column(
-            DateTime, 
-            default=datetime.utcnow,
+            DateTime,
+            default=utcnow,
             nullable=False
         )
 
     @declared_attr
     def updated_at(cls):
         return Column(
-            DateTime, 
-            default=datetime.utcnow,
-            onupdate=datetime.utcnow,
+            DateTime,
+            default=utcnow,
+            onupdate=utcnow,
             nullable=False
         )
 
